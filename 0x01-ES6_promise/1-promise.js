@@ -8,10 +8,7 @@ export default function getFullResponseFromAPI(success) {
       };
       resolve(responseObject);
     } else {
-      const errorObject = {
-        Error: 'The Fake API is not working currently',
-      };
-      reject(errorObject);
+      reject(new Error('The fake API is not working currently'));
     }
   });
 }
