@@ -7,7 +7,9 @@ export default class Building {
     return this._sqft;
   }
 
+  /* eslint-disable class-methods-use-this */
   evacuationWarningMessage() {
     throw new Error('Class extending Building must override evacuationWarningMessage');
   }
+  /* eslint-disable class-methods-use-this */
 }
