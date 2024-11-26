@@ -1,4 +1,3 @@
-// Makes use of let and const to declare variables
 export function taskFirst() {
   const task = 'I prefer const when I can.';
   return task;
