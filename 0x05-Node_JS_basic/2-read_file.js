@@ -10,7 +10,7 @@ const countStudents = (filePath) => {
     const rows = data.split('\n').filter((row) => row.trim() !== '');
     rows.shift();
     const totalStudents = rows.length;
-    console.log('Number of students', totalStudents);
+    console.log('Number of students:', totalStudents);
     rows.forEach((row) => {
       const [firstName, , , field] = row.split(',');
 
