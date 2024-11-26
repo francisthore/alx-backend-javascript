@@ -13,3 +13,5 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log('Server running on localserver port: ', port);
 });
+
+module.exports = app;
