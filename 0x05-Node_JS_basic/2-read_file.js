@@ -14,11 +14,20 @@ const countStudents = (filePath) => {
     const fieldInfo = {};
     const data = fs.readFileSync(filePath, { encoding: 'utf8' });
     const rows = data.split('\n').filter((row) => row.trim() !== '');
+
+    if (rows.length === 0) {
+      throw new Error('Cannot load the database');
+    }
+
     rows.shift();
-    const totalStudents = rows.length;
-    console.log('Number of students:', totalStudents);
+    console.log(`Number of students: ${rows.length}`);
+
     rows.forEach((row) => {
-      const [firstName, , , field] = row.split(',');
+      const columns = row.split(',');
+      if (columns.length < 4 || !columns[0] || !columns[3]) {
+        return;
+      }
+      const [firstName, , , field] = columns;
 
       if (!fieldInfo[field]) {
         fieldInfo[field] = {
