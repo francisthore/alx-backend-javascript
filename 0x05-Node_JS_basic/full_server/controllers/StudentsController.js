@@ -32,8 +32,7 @@ class StudentsController {
         const students = data[major] || [];
         res.status(200).send(`List: ${students.join(', ')}`);
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         res.status(500).send('Cannot load the database');
       });
   }
