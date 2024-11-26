@@ -1,9 +1,10 @@
 /**
- * Sets up basic http server
+ * Sets up a basic HTTP server with improved modularity and error handling.
  */
 const http = require('http');
 const fs = require('fs');
 
+const PORT = 1245;
 const FILE_PATH = process.argv.length > 2 ? process.argv[2] : '';
 
 const countStudents = (filePath) => new Promise((resolve, reject) => {
@@ -15,7 +16,7 @@ const countStudents = (filePath) => new Promise((resolve, reject) => {
 
     try {
       const rows = data.split('\n').filter((row) => row.trim() !== '');
-      if (rows.length === 0) {
+      if (rows.length <= 1) {
         reject(new Error('Cannot load the database'));
         return;
       }
@@ -23,7 +24,6 @@ const countStudents = (filePath) => new Promise((resolve, reject) => {
       rows.shift();
 
       const fieldInfo = {};
-
       rows.forEach((row) => {
         const columns = row.split(',');
         if (columns.length < 4 || !columns[0] || !columns[3]) {
@@ -40,39 +40,44 @@ const countStudents = (filePath) => new Promise((resolve, reject) => {
         fieldInfo[field].names.push(firstName);
       });
 
-      const printData = [];
-      printData.push((`Number of students: ${rows.length}`));
+      const report = [];
+      report.push(`Number of students: ${rows.length}`);
 
       Object.keys(fieldInfo).forEach((field) => {
         const { count, names } = fieldInfo[field];
-        printData.push((`Number of students in ${field}: ${count}. List: ${names.join(', ')}`));
+        report.push(`Number of students in ${field}: ${count}. List: ${names.join(', ')}`);
       });
 
-      resolve(printData);
+      resolve(report.join('\n'));
     } catch (processingError) {
       reject(new Error('Cannot load the database'));
     }
   });
 });
 
-const app = http.createServer((req, res) => {
-  res.statusCode = 200;
+const app = http.createServer(async (req, res) => {
   res.setHeader('Content-Type', 'text/plain');
-  if (req.url === '/') {
-    res.end('Hello Holberton School!');
-  } else if (req.url === '/students') {
-    countStudents(FILE_PATH)
-      .then((data) => {
-        const output = ['This is the list of our students', ...data].join('\n');
-        res.end(output);
-      })
-      .catch((err) => {
-        res.statusCode = 500;
-        res.end(err.message);
-      });
+  try {
+    if (req.url === '/') {
+      res.statusCode = 200;
+      res.end('Hello Holberton School!');
+    } else if (req.url === '/students') {
+      const studentData = await countStudents(FILE_PATH);
+      const output = `This is the list of our students\n${studentData}`;
+      res.statusCode = 200;
+      res.end(output);
+    } else {
+      res.statusCode = 404;
+      res.end('Not Found');
+    }
+  } catch (error) {
+    res.statusCode = 500;
+    res.end(`Error: ${error.message}`);
   }
 });
 
-app.listen(1245);
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
 
 module.exports = app;
