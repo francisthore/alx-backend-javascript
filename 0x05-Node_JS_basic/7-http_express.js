@@ -1,11 +1,11 @@
 /**
- * A lit bit advance express app
+ * A slightly advanced express app with precise output formatting
  */
 const express = require('express');
 const fs = require('fs');
 
 const app = express();
-const port = 1245;
+const PORT = 1245;
 const FILE_PATH = process.argv.length > 2 ? process.argv[2] : '';
 
 const countStudents = (filePath) => new Promise((resolve, reject) => {
@@ -43,14 +43,14 @@ const countStudents = (filePath) => new Promise((resolve, reject) => {
       });
 
       const printData = [];
-      printData.push((`Number of students: ${rows.length}`));
+      printData.push(`Number of students: ${rows.length}`);
 
       Object.keys(fieldInfo).forEach((field) => {
         const { count, names } = fieldInfo[field];
-        printData.push((`Number of students in ${field}: ${count}. List: ${names.join(', ')}`));
+        printData.push(`Number of students in ${field}: ${count}. List: ${names.join(', ')}`);
       });
 
-      resolve(printData);
+      resolve(printData.join('\n'));
     } catch (processingError) {
       reject(new Error('Cannot load the database'));
     }
@@ -64,16 +64,25 @@ app.get('/', (req, res) => {
 app.get('/students', (req, res) => {
   countStudents(FILE_PATH)
     .then((data) => {
-      const output = ['This is the list of our students', ...data].join('\n');
-      res.send(output.trim());
+      const output = `This is the list of our students\n${data}`;
+      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader('Content-Length', Buffer.byteLength(output));
+      res.statusCode = 200;
+      res.write(output);
+      res.end();
     })
-    .catch(() => {
-      res.status(500).send('Cannot load the database');
+    .catch((error) => {
+      const output = `This is the list of our students\n${error.message}`;
+      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader('Content-Length', Buffer.byteLength(output));
+      res.statusCode = 200;
+      res.write(output);
+      res.end();
     });
 });
 
-app.listen(port, () => {
-  console.log('Server running on localhost listening on port: ', port);
+app.listen(PORT, () => {
+  console.log(`Server running on localhost listening on port: ${PORT}`);
 });
 
 module.exports = app;
