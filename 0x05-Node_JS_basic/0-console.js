@@ -1,5 +1,5 @@
 // Module that defines a function that displays message
-function displayMessage (msg) {
+const displayMessage = (msg) => {
   console.log(msg);
 }
 
