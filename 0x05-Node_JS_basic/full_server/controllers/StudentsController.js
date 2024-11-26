@@ -1,17 +1,15 @@
-import { readDatabase } from '../utils';
+import readDatabase from '../utils';
+
+const VALID_MAJORS = ['CS', 'SWE'];
 
 class StudentsController {
-  /**
-   * static method to get all students
-   * @param {Object} req - The HTTP request object
-   * @param {Object} res - The HTTP response object
-   */
   static getAllStudents(req, res) {
-    readDatabase(req.app.get('DB_FILE'))
+    const filePath = process.argv.length > 2 ? process.argv[2] : '';
+    readDatabase(filePath)
       .then((data) => {
         const output = ['This is the list of our students'];
         Object.keys(data)
-          .sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}))
+          .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
           .forEach((field) => {
             output.push(`Number of students in ${field}: ${data[field].length}. List: ${data[field].join(', ')}`);
           });
@@ -22,29 +20,24 @@ class StudentsController {
       });
   }
 
-  /**
-   * static method to get all students by field
-   * @param {Object} req - The HTTP request object
-   * @param {Object} res - The HTTP response object
-   */
   static getAllStudentsByMajor(req, res) {
     const { major } = req.params;
-    if (major !== 'CS' && major !== 'SWE') {
+    const filePath = process.argv.length > 2 ? process.argv[2] : '';
+    if (!VALID_MAJORS.includes(major)) {
       res.status(500).send('Major parameter must be CS or SWE');
       return;
     }
-    readDatabase(req.app.get('DB_FILE'))
+    readDatabase(filePath)
       .then((data) => {
-        if (data[major]) {
-          res.status(200).send(`List: ${data[major].join(', ')}`);
-        } else {
-          res.status(200).send('List: ');
-        }
+        const students = data[major] || [];
+        res.status(200).send(`List: ${students.join(', ')}`);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log(err);
         res.status(500).send('Cannot load the database');
       });
   }
 }
 
 export default StudentsController;
+module.exports = StudentsController;
