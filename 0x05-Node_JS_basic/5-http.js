@@ -63,11 +63,8 @@ const app = http.createServer((req, res) => {
   } else if (req.url === '/students') {
     countStudents(FILE_PATH)
       .then((data) => {
-        res.write('This is the list of our students\n');
-        data.forEach((sentence) => {
-          res.write(`${sentence}\n`);
-        });
-        res.end();
+        const output = ['This is the list of our students', ...data].join('\n');
+        res.end(output);
       })
       .catch((err) => {
         res.statusCode = 500;
