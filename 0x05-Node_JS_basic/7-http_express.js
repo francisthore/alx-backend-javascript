@@ -65,10 +65,10 @@ app.get('/students', (req, res) => {
   countStudents(FILE_PATH)
     .then((data) => {
       const output = ['This is the list of our students', ...data].join('\n');
-      res.send(output);
+      res.send(output.trim());
     })
-    .catch((error) => {
-      res.send(error.message);
+    .catch(() => {
+      res.status(500).send('Cannot load the database');
     });
 });
 
